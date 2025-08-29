@@ -3,7 +3,8 @@ from django.http import HttpResponse
 from django.urls import reverse
 from .models import Detail,About
 from django.core.paginator import Paginator
-from blog.forms import contact
+from blog.forms import Contact,Register
+from django.contrib import messages
 import logging
 
 def index(request):
@@ -28,7 +29,7 @@ def new_url(request):
 
 def contact_view(request):
         if request.method=='POST':
-            form = contact(request.POST)
+            form = Contact(request.POST)
             name=request.POST.get('name')
             email=request.POST.get('email')
             message=request.POST.get('message')
@@ -47,4 +48,21 @@ def about_view(request):
     return render(request,'blog/about.html',{"about":about})
 
 def register(request):
-    return render(request,'blog/register.html')
+    form=Register()
+    logger = logging.getLogger("TESTING")
+    if request.method=='POST':
+        form=Register(request.POST) 
+        username=request.POST.get('username')
+        email=request.POST.get('email')
+        password=request.POST.get('password')
+        if form.is_valid():
+            user=form.save(commit=False)
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+            messages.success(request,'register successful')
+            logger.debug(f"{form.cleaned_data['username']} and {form.cleaned_data['email']} and {form.cleaned_data['password']}")
+            return redirect('blog:register')
+        else:
+            logger.debug(f"form validation failure")
+        return render(request,'blog/register.html',{'form':form,'name':username,'email':email,'password':password})
+    return render(request,'blog/register.html',{'form':form})

@@ -4,29 +4,31 @@
     <div class="col-4">
       <h3>Register</h3>
       <div class="">
-        <!-- Error messages -->
+        {% for field in form %} {% if field.errors %}
         <div class="col-12">
-          <span class="fw-bold">Username</span>
-          <span class="text-danger">[Error message for username]</span>
+          <span class="fw-blod">{{ field.label_tag }}</span>
+          {% for err in field.errors %}
+          <span class="text-danger">{{ err }}</span>
+          {% endfor %}
         </div>
-        <div class="col-12">
-          <span class="fw-bold">Email</span>
-          <span class="text-danger">[Error message for email]</span>
+        {% endif %} {% endfor %} {% if success_msg %}
+        <div class="alert alert-success" role="alert">{{ success_msg }}</div>
+        {% endif %}
+
+        {% for error in form.non_field_errors %}
+        <div class='alert alert-danger'>
+          <span class='text-danger'>{{ error }}</span>
         </div>
-        <div class="col-12">
-          <span class="fw-bold">Password</span>
-          <span class="text-danger">[Error message for password]</span>
-        </div>
-        <div class="col-12">
-          <span class="fw-bold">Confirm Password</span>
-          <span class="text-danger">[Error message for confirm password]</span>
-        </div>
-        <div class="col-12">
-          <span class="text-danger">[Non-field error]</span>
-        </div>
+        {% endfor %}
+        {% if messages %}
+          {% for msg in messages %}
+            <div class='alert alert-success'>{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
       </div>
       <div class="my-3">
         <form method="post">
+          {% csrf_token %}
           <div class="form-group">
             <label for="username" class="form-label">Username</label>
             <input
@@ -34,7 +36,7 @@
               class="form-control"
               id="username"
               name="username"
-              value=""
+              value="{{ username | default:"" }}" required
             />
           </div>
           <div class="form-group">
@@ -44,7 +46,7 @@
               class="form-control"
               id="email"
               name="email"
-              value=""
+              value="{{ email }}" required
             />
           </div>
           <div class="form-group">
@@ -54,6 +56,7 @@
               class="form-control"
               id="password"
               name="password"
+              value="{{ password }}" required
             />
           </div>
           <div class="form-group">

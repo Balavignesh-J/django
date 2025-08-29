@@ -45,3 +45,6 @@ def contact_view(request):
 def about_view(request):
     about=About.objects.get(id=1)
     return render(request,'blog/about.html',{"about":about})
+
+def register(request):
+    return render(request,'blog/register.html')

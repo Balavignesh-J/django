@@ -1,5 +1,4 @@
 {% extends "blog/main.html" %} {% block content %}
-
 <div class="container-fluid">
   <div class="row d-flex justify-content-center mt-5">
     <div class="col-4">
@@ -10,30 +9,32 @@
           <span class="text-danger"></span>
         </div>
       </div>
-
-      <div class="col-12">
-        <span class="text-danger"></span>
-      </div>
-
-      <div class="container mt-3">
-        <div class="d-flex justify-content-center">
-          <div
-            class="alert alert-success alert-dismissible fade show"
-            role="alert"
-          >
-            Message
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="alert"
-              aria-label="Close"
-            ></button>
-          </div>
+      <div>
+        {% for field in form %} {% if field.errors %}
+        <div class="col-12">
+          <span class="fw-blod">{{ field.label_tag }}</span>
+          {% for err in field.errors %}
+          <span class="text-danger">{{ err }}</span>
+          {% endfor %}
         </div>
-      </div>
+        {% endif %} {% endfor %} {% if success_msg %}
+        <div class="alert alert-success" role="alert">{{ success_msg }}</div>
+        {% endif %}
 
+        {% for error in form.non_field_errors %}
+        <div class='alert alert-danger'>
+          <span class='text-danger'>{{ error }}</span>
+        </div>
+        {% endfor %}
+        {% if messages %}
+          {% for msg in messages %}
+            <div class='alert alert-success'>{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      </div>
       <div class="my-3">
         <form method="post">
+          {% csrf_token %}
           <div class="form-group">
             <label for="username" class="form-label">Username</label>
             <input
@@ -41,7 +42,7 @@
               class="form-control"
               id="username"
               name="username"
-              value=""
+              value="{{ login.username.value | default:''}}"
             />
           </div>
 
@@ -52,6 +53,7 @@
               class="form-control"
               id="password"
               name="password"
+              value="{{ login.password.value | default:'' }}"
             />
           </div>
 

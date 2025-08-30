@@ -4,7 +4,7 @@
   <div class="d-flex gap-3 justify-content-center mt-5">
     <img src="https://picsum.photos/200/300" alt="" />
     <div class="content">
-      {{ about }}
+      {{ about | default:""}}
     </div>
   </div>
 </div>

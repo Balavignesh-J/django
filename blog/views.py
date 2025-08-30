@@ -3,8 +3,9 @@ from django.http import HttpResponse
 from django.urls import reverse
 from .models import Detail,About
 from django.core.paginator import Paginator
-from blog.forms import Contact,Register
+from blog.forms import Contact,Register,Login
 from django.contrib import messages
+from django.contrib.auth import authenticate ,login as auth_login
 import logging
 
 def index(request):
@@ -44,7 +45,7 @@ def contact_view(request):
         return render(request,'blog/contact.html')
 
 def about_view(request):
-    about=About.objects.get(id=1)
+    about=About.objects.get(pk=1)
     return render(request,'blog/about.html',{"about":about})
 
 def register(request):
@@ -66,3 +67,19 @@ def register(request):
             logger.debug(f"form validation failure")
         return render(request,'blog/register.html',{'form':form,'name':username,'email':email,'password':password})
     return render(request,'blog/register.html',{'form':form})
+
+def login(request):
+    form=Login()
+    if request.method=='POST':
+        form=Login(request.POST)
+        if form.is_valid():
+            username=form.cleaned_data['username']
+            password=form.cleaned_data['password']
+            user=authenticate(username=username ,password=password)
+            if user is not None:
+                auth_login(request ,user)
+                return redirect('/dashboard')
+    return render(request,'blog/login.html' ,{'form':form})
+
+def dashboard(request):
+    return render(request ,'blog/dashboard.html')

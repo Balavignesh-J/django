@@ -4,8 +4,8 @@ from django.urls import reverse
 from django.core.paginator import Paginator
 from django.contrib import messages
 from .models import Detail,About
-from blog.forms import Contact,Register,Login,Forgot_password
-from django.utils.http import urlsafe_base64_encode
+from blog.forms import Contact,Register,Login,Forgot_password, Resetpassword
+from django.utils.http import urlsafe_base64_encode,urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
@@ -120,11 +120,29 @@ def forgot_password(request):
             )
             send_mail(subject,message,'noreply@bvcode.com',[email])
             messages.success(request, "email sent successfully")
-            return redirect('blog:login')
     else:
         form = Forgot_password()
 
     return render(request ,"blog/forgot_password.html",{"form":form})
 
-def reset_password(request):
-    pass
+def reset_password(request, uidb64, token):
+    form=Resetpassword()
+    if request.method=="POST":
+        form = Resetpassword(request.POST)
+        if form.is_valid():
+            new_password = form.cleaned_data["new_password"]
+            try:
+                uid= urlsafe_base64_decode(uidb64)
+                user = User.objects.get(pk=uid)
+            except(TypeError,ValueError,OverflowError,User.DoesNotExist):
+                user=None
+
+            if user is not None and default_token_generator.check_token(user,token):
+                user.set_password(new_password)
+                user.save()
+                messages.success(request,"Password reset successful")
+                return redirect("blog:login")
+            else:
+                messages.error(request,"Password reset link expired")
+            
+    return render(request, "blog/reset_password.html",{"form":form})

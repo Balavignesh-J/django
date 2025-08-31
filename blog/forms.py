@@ -38,3 +38,14 @@ class Login(forms.Form):
             user = authenticate(username=username , password=password)
             if user is None:
                 raise forms.ValidationError("user doesn't exist please register")
+            
+class Forgot_password(forms.Form):
+    email = forms.EmailField(label="Email", required=True)  # Make email required
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        if not User.objects.filter(email=email).exists():
+            raise forms.ValidationError("User with this email does not exist")
+        return email
+
+    

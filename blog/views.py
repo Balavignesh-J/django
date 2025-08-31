@@ -1,12 +1,20 @@
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.urls import reverse
-from .models import Detail,About
 from django.core.paginator import Paginator
-from blog.forms import Contact,Register,Login
 from django.contrib import messages
-from django.contrib.auth import authenticate ,login as auth_login,logout
+from .models import Detail,About
+from blog.forms import Contact,Register,Login,Forgot_password
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
+
 import logging
+from django.contrib.auth import authenticate ,login as auth_login,logout
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.models import User
+from django.contrib.sites.shortcuts import get_current_site
 
 def index(request):
     detail=Detail.objects.all()
@@ -82,8 +90,41 @@ def login(request):
     return render(request,'blog/login.html' ,{'form':form})
 
 def dashboard(request):
-    return render(request ,'blog/dashboard.html')
+    if request.user.is_authenticated:
+        username = request.user.username
+    return render(request ,'blog/dashboard.html',{'name':username})
 
 def logout_view(request):
     logout(request)
     return redirect(reverse('blog:index'))
+
+def forgot_password(request):
+    if request.method=='POST':
+        form = Forgot_password(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            user = User.objects.get(email=email)
+            token = default_token_generator.make_token(user)
+            uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+            site = get_current_site(request)
+            domain = site.domain
+            subject = 'password reset email'
+            message = render_to_string(
+                "blog/reset_password_email.html",
+                {
+                    "domain": domain,
+                    "uidb64": uidb64,
+                    "token": token,
+                    "user": user
+                }
+            )
+            send_mail(subject,message,'noreply@bvcode.com',[email])
+            messages.success(request, "email sent successfully")
+            return redirect('blog:login')
+    else:
+        form = Forgot_password()
+
+    return render(request ,"blog/forgot_password.html",{"form":form})
+
+def reset_password(request):
+    pass

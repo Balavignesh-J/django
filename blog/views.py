@@ -5,7 +5,7 @@ from .models import Detail,About
 from django.core.paginator import Paginator
 from blog.forms import Contact,Register,Login
 from django.contrib import messages
-from django.contrib.auth import authenticate ,login as auth_login
+from django.contrib.auth import authenticate ,login as auth_login,logout
 import logging
 
 def index(request):
@@ -62,7 +62,7 @@ def register(request):
             user.save()
             messages.success(request,'register successful')
             logger.debug(f"{form.cleaned_data['username']} and {form.cleaned_data['email']} and {form.cleaned_data['password']}")
-            return redirect('blog:register')
+            return redirect('blog:login')
         else:
             logger.debug(f"form validation failure")
         return render(request,'blog/register.html',{'form':form,'name':username,'email':email,'password':password})
@@ -83,3 +83,7 @@ def login(request):
 
 def dashboard(request):
     return render(request ,'blog/dashboard.html')
+
+def logout_view(request):
+    logout(request)
+    return redirect(reverse('blog:index'))

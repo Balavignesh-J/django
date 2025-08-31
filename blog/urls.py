@@ -8,6 +8,7 @@ urlpatterns = [
     path("register",views.register,name='register'),
     path("login",views.login,name='login'),
     path("dashboard",views.dashboard,name='dashboard'),
+    path("logout",views.logout_view,name='logout'),
     path("about",views.about_view,name='about'),
     path("new_url",views.new_url,name='new_pg_url'),
     path("old_url",views.old_url,name='old_url'),

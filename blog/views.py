@@ -92,7 +92,8 @@ def login(request):
 def dashboard(request):
     if request.user.is_authenticated:
         username = request.user.username
-    return render(request ,'blog/dashboard.html',{'name':username})
+    all_post = Detail.objects.filter(user=request.user)
+    return render(request ,'blog/dashboard.html',{'name':username,"detail":all_post})
 
 def logout_view(request):
     logout(request)

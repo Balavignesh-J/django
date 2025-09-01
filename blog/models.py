@@ -1,9 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
-
-# Create your models here.
-# title content description
+from django.contrib.auth.models import User
 
 class Detail(models.Model):
     title=models.CharField(max_length=20)
@@ -12,6 +10,7 @@ class Detail(models.Model):
     created_at=models.DateTimeField(default=timezone.now)
     slug=models.SlugField(unique=True,blank=True,default='')
     category=models.ForeignKey("blog.Category", on_delete=models.CASCADE)
+    user=models.ForeignKey(User, on_delete=models.CASCADE ,null=True)
 
     def save(self, *args, **kwargs):
        self.slug=slugify(self.title)
@@ -19,7 +18,7 @@ class Detail(models.Model):
 
     def __str__(self):
         return self.title
-    
+
 class Category(models.Model):
     name=models.TextField()
 

@@ -3,8 +3,8 @@ from django.http import HttpResponse
 from django.urls import reverse
 from django.core.paginator import Paginator
 from django.contrib import messages
-from .models import Detail,About
-from blog.forms import Contact,Register,Login,Forgot_password, Resetpassword
+from .models import Category, Detail,About
+from blog.forms import Contact, New_post,Register,Login,Forgot_password, Resetpassword
 from django.utils.http import urlsafe_base64_encode,urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
@@ -147,3 +147,15 @@ def reset_password(request, uidb64, token):
                 messages.error(request,"Password reset link expired")
             
     return render(request, "blog/reset_password.html",{"form":form})
+
+def new_post(request):
+    category = Category.objects.all()
+    form = New_post()
+    if request.method == "POST":
+        form = New_post(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save()
+            post.user = request.user
+            post.save()
+            return redirect("blog:dashboard")
+    return render(request, 'blog/new_post.html',{"category":category,"form":form})

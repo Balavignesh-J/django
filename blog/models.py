@@ -4,9 +4,9 @@ from django.utils.text import slugify
 from django.contrib.auth.models import User
 
 class Detail(models.Model):
-    title=models.CharField(max_length=20)
+    title=models.CharField(max_length=50)
     content=models.TextField(null=True)
-    img_url=models.URLField(max_length=200,blank=True)
+    img_url=models.ImageField(upload_to="post/images" ,null=True)
     created_at=models.DateTimeField(default=timezone.now)
     slug=models.SlugField(unique=True,blank=True,default='')
     category=models.ForeignKey("blog.Category", on_delete=models.CASCADE)
@@ -15,6 +15,10 @@ class Detail(models.Model):
     def save(self, *args, **kwargs):
        self.slug=slugify(self.title)
        super().save(*args, **kwargs)
+
+    @property
+    def format_img_url(self):
+        return self.img_url if self.img_url.__str__().startswith(("https://","http://")) else self.img_url.url
 
     def __str__(self):
         return self.title

@@ -15,7 +15,24 @@
     </div>
   </div>
   <div class="row d-flex justify-content-center">
-    <div class="col-6">[ERRORS]</div>
+    <div class="col-6">
+      {% for field in form %} {% if field.errors %}
+        <div class="col-12">
+          <span class="fw-blod">{{ field.label_tag }}</span>
+          {% for err in field.errors %}
+          <span class="text-danger">{{ err }}</span>
+          {% endfor %}
+        </div>
+        {% endif %} {% endfor %} {% if success_msg %}
+        <div class="alert alert-success" role="alert">{{ success_msg }}</div>
+        {% endif %} {% for error in form.non_field_errors %}
+        <div class="alert alert-danger">
+          <span class="text-danger">{{ error }}</span>
+        </div>
+        {% endfor %} {% if messages %} {% for msg in messages %}
+        <div class="alert alert-success">{{ msg }}</div>
+        {% endfor %} {% endif %}
+    </div>
   </div>
   <div class="row">
     <h2 class="mt-3">My posts</h2>
@@ -46,6 +63,14 @@
                 >
                 <a href="#" class="text-decoration-none text-dark fw-bold">
                   {{ post.category.name }}
+                </a>
+              </div>
+              <div class="mt-auto d-flex justify-content-between mt-2">
+                <a href="{% url 'blog:edit_post' post.id %}" class="text-decoration-none text-dark fw-bold btn btn-warning">
+                  Edit Post
+                </a>
+                <a href="{% url 'blog:delete_post' post.id %}" class="text-decoration-none text-dark fw-bold btn btn-danger">
+                  Delete Post
                 </a>
               </div>
             </div>

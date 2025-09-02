@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import get_object_or_404, render,redirect
 from django.http import HttpResponse
 from django.urls import reverse
 from django.core.paginator import Paginator
@@ -159,3 +159,18 @@ def new_post(request):
             post.save()
             return redirect("blog:dashboard")
     return render(request, 'blog/new_post.html',{"category":category,"form":form})
+
+def edit_post(request, post_id):
+    categories = Category.objects.all()
+    post = get_object_or_404(Detail , id=post_id)
+    form = New_post()
+    if request.method == "POST":
+        form = New_post(request.POST, request.FILES, instance=post)
+        if form.is_valid():
+            form.save()
+            messages.success(request,"Post update successful")
+            return redirect("blog:dashboard")
+    return render(request, "blog/edit_post.html", {"categories":categories, "post":post,"form":form})
+
+def delete_post(request,post_id):
+    pass

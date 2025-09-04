@@ -74,7 +74,7 @@ def register(request):
             user.set_password(form.cleaned_data['password'])
             user.save()
             #group
-            reader ,created = Group.objects.get_or_create(name='Readers')
+            reader ,created = Group.objects.get_or_create(name='Editors')
             user.groups.add(reader)
             messages.success(request,'register successful')
             logger.debug(f"{form.cleaned_data['username']} and {form.cleaned_data['email']} and {form.cleaned_data['password']}")

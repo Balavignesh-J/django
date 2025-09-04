@@ -15,6 +15,8 @@ from django.contrib.auth import authenticate ,login as auth_login,logout
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.models import User
 from django.contrib.sites.shortcuts import get_current_site
+from django.contrib.auth.decorators import login_required,permission_required
+from django.contrib.auth.models import Group
 
 def index(request):
     detail=Detail.objects.all()
@@ -26,6 +28,9 @@ def index(request):
     return render(request,'blog/index.html',{'home':home,'detail':pg_obj})
 
 def detail(request,slug):
+    if request.user and not request.user.has_perm("blog.view_detail"):
+        messages.error(request, "you are not allowed to view post")
+        return redirect("blog:index")
     det=Detail.objects.get(slug=slug)
     relation=Detail.objects.filter(category=det.category).exclude(pk=det.pk)
     return render(request,'blog/detail.html',{'post':det,'related':relation})
@@ -68,6 +73,9 @@ def register(request):
             user=form.save(commit=False)
             user.set_password(form.cleaned_data['password'])
             user.save()
+            #group
+            reader ,created = Group.objects.get_or_create(name='Readers')
+            user.groups.add(reader)
             messages.success(request,'register successful')
             logger.debug(f"{form.cleaned_data['username']} and {form.cleaned_data['email']} and {form.cleaned_data['password']}")
             return redirect('blog:login')
@@ -148,6 +156,8 @@ def reset_password(request, uidb64, token):
             
     return render(request, "blog/reset_password.html",{"form":form})
 
+@login_required
+@permission_required("blog.add_detail", raise_exception=True)
 def new_post(request):
     category = Category.objects.all()
     form = New_post()
@@ -160,6 +170,7 @@ def new_post(request):
             return redirect("blog:dashboard")
     return render(request, 'blog/new_post.html',{"category":category,"form":form})
 
+@login_required
 def edit_post(request, post_id):
     categories = Category.objects.all()
     post = get_object_or_404(Detail , id=post_id)
@@ -171,6 +182,9 @@ def edit_post(request, post_id):
             messages.success(request,"Post update successful")
             return redirect("blog:dashboard")
     return render(request, "blog/edit_post.html", {"categories":categories, "post":post,"form":form})
-
+@login_required
 def delete_post(request,post_id):
-    pass
+    post = get_object_or_404(Detail , id=post_id)
+    post.delete()
+    messages.success(request, "Post deleted sucessfully")
+    return redirect("blog:dashboard")
